@@ -1,0 +1,5 @@
+The directory of the files is given below.
+
+D:\Flask\test.csv
+        \Templates\about.html Data.html and all html files
+        \static\css\main.css
