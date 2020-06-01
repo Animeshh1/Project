@@ -1,0 +1,87 @@
+from flask import Flask, render_template
+from flask_wtf import Form
+from wtforms.fields.html5 import DateField
+import numpy as np
+import csv
+import matplotlib.pyplot as plt
+from flask import request, redirect
+import os
+os.chdir("D:\\Flask")
+
+import glob
+import numpy as np
+import pandas as pd
+import datetime
+import sys
+import time
+
+app = Flask(__name__)
+app.secret_key = 'SHH!'
+
+# Set the seed so that the numbers can be reproduced.
+np.random.seed(0)  
+
+for i in range(0,6):
+    timestr = time.strftime("%Y-%m-%d-%H-%M-%S")
+    df = pd.DataFrame(np.random.randn(5,2), columns=list('AB'))
+    df.to_csv(timestr +'.csv', index=False, header=True)
+    time.sleep(1)
+    
+#predefining the extension
+extension = 'csv'
+#loading all files the extension of .csv
+
+    
+all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
+combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames ])
+#export to csv
+combined_csv.to_csv( "combined_csv.csv", index=False, encoding='utf-8-sig')
+print("Combined file created successfully. Please check directory")
+
+x=[]
+y=[]
+
+with open("combined_csv.csv", 'r') as csvfile:  #opening the combined_csv.csv file
+    plots= csv.reader(csvfile)
+    for row in plots:
+        x.append(row[0])
+        y.append(row[1])
+
+plt.plot(x,y, marker='o')
+
+#defining graph title, x-axix title and y-axis title
+
+plt.title('Data from the CSV File: Current and Energy')
+
+plt.xlabel('Current')
+plt.ylabel('Energy')
+
+plt.savefig('D:\\Flask\\static\\fig.png')
+#showing graph
+plt.show()
+
+class ExampleForm(Form):
+    dt = DateField('DatePicker', format='%Y-%m-%d')
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/about/')
+def about():
+    return render_template('about.html')
+
+@app.route('/Data/', methods=['POST','GET'])
+def Data():
+    form = ExampleForm()
+    if form.validate_on_submit():
+        return form.dt.data.strftime('%d-%m-%Y')
+    
+    return render_template('Data.html', form=form)
+
+@app.route('/graph/')
+def Graph():
+    return render_template('Graph.html')
+
+if __name__ == '__main__':
+    app.run(debug=False)
